@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FirstFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- SECCIÓN 1: CALCULADOR DE EDAD -->
+        <TextView
+            android:id="@+id/textViewTitulo1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="1. CALCULADOR DE EDAD"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#1976D2"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Fecha de nacimiento (dd/MM/yyyy)"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewTitulo1"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextFechaNacimiento"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="date" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/buttonCalcularEdad"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Calcular Edad"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/textViewResultado"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="14sp"
+            android:textAlignment="center"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:background="#E3F2FD"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonCalcularEdad" />
+
+        <!-- SECCIÓN 2: FUNCIÓN CALCULAR CUADRADO -->
+        <TextView
+            android:id="@+id/textViewTitulo2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="2. FUNCIÓN: CALCULAR CUADRADO"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#1976D2"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewResultado" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputNumero"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Ingrese un número"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewTitulo2"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextNumero"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/buttonCalcularCuadrado"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Calcular Cuadrado"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textInputNumero"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/textViewResultadoCuadrado"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="14sp"
+            android:textAlignment="center"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:background="#E8F5E9"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonCalcularCuadrado" />
+
+        <!-- SECCIÓN 3: CLASE CONTADOR -->
+        <TextView
+            android:id="@+id/textViewTitulo3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="3. CLASE CONTADOR"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#1976D2"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewResultadoCuadrado" />
+
+        <TextView
+            android:id="@+id/textViewContadorValor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Valor del contador: 0"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            android:layout_marginTop="8dp"
+            android:padding="16dp"
+            android:background="#FFF9C4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewTitulo3" />
+
+        <Button
+            android:id="@+id/buttonIncrementar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Incrementar"
+            app:layout_constraintEnd_toStartOf="@+id/buttonResetear"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewContadorValor"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/buttonResetear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Resetear"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/buttonIncrementar"
+            app:layout_constraintTop_toBottomOf="@+id/textViewContadorValor"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp" />
+
+        <!-- SECCIÓN 4: DATA CLASS USUARIO -->
+        <TextView
+            android:id="@+id/textViewTitulo4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="4. DATA CLASS USUARIO + EXTENSIONS"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#1976D2"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonIncrementar" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputNombre"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Nombre"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewTitulo4"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputCorreo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Correo electrónico"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textInputNombre"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextCorreo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputEdad"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Edad"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textInputCorreo"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextEdad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/buttonCrearUsuario"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Crear Usuario y Ver Extensions"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textInputEdad"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/textViewResultadoUsuario"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            android:padding="12dp"
+            android:background="#F3E5F5"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonCrearUsuario" />
+
+        <!-- SECCIÓN 5: VARIABLES -->
+        <TextView
+            android:id="@+id/textViewTitulo5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="5. VARIABLES (5 tipos diferentes)"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#1976D2"
+            android:layout_marginTop="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewResultadoUsuario" />
+
+        <Button
+            android:id="@+id/buttonMostrarVariables"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Mostrar Variables Declaradas"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewTitulo5"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/textViewVariables"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:padding="12dp"
+            android:background="#ECEFF1"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonMostrarVariables"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
