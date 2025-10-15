@@ -1,4 +1,4 @@
-# Análisis Comparativo: Kotlin, C# y JavaScript
+# Práctica 02
 
 ## Información del Proyecto
 
