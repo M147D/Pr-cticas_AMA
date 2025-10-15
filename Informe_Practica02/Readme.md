@@ -1,9 +1,6 @@
 # Práctica 02
 
-## Información del Proyecto
-
 **Nombre:** Estudio Comparativo de Lenguajes de Programación para Desarrollo Móvil
-
 
 ## Descripción
 
