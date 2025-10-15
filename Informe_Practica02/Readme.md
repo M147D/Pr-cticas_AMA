@@ -6,7 +6,6 @@
 
 Este proyecto tiene como objetivo realizar un análisis exhaustivo de tres lenguajes de programación ampliamente utilizados en el desarrollo de software: **Kotlin**, **C#** y **JavaScript**. La práctica busca comprender la sintaxis básica de Kotlin, comparar las características fundamentales entre los tres lenguajes y identificar ventajas y desventajas de cada uno en el contexto del desarrollo móvil. Además, se analizan características especiales de Kotlin como null safety, data classes y sealed classes, explorando casos de uso reales de cada lenguaje en la industria.
 
----
 ## Conclusiones y Recomendaciones
 
 ### Conclusiones:
