@@ -1,6 +1,6 @@
 # Práctica 02
 
-**Nombre:** Estudio Comparativo de Lenguajes de Programación para Desarrollo Móvil
+**Nombre:** Calculadora_Num02
 
 ## Descripción
 
