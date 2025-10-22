@@ -177,17 +177,6 @@ fun LoginScreen(onLoginSuccess: (Usuario) -> Unit) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            /*usuariosFiltrados.take(5).forEach { usuario ->
-                SugerenciaCard(
-                    usuario = usuario,
-                    onClick = {
-                        nombreUsuario = usuario.nombre
-                        mostrarSugerencias = false
-                    }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }*/
-
             if (usuariosFiltrados.size > 5) {
                 Text(
                     text = "... y ${usuariosFiltrados.size - 5} más",
