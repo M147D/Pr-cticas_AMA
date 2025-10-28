@@ -29,3 +29,13 @@ reglas que validen el control de asistencia, implementando la composición de fu
   que su uso sea intuitivo y consistente a lo largo de todo el proyecto.
 *  Para las firmas de las lambdas de reglas ((Usuario) -> Boolean), se sugiere el uso de typealias (e.g., typealias Rule = (Usuario) -> Boolean) para hacer la intención
   del código más clara y reducir la redundancia en las declaraciones de funciones.
+
+### Capturas
+Validación de registro de asistencia dentro del rango horario de un usuario normal.  
+![Alt text](https://github.com/M147D/Pr-cticas_AMA/blob/main/Informe_Practica03/Capturas/Proyecto%2003%20(1).png "a title")  
+
+Visualización de registros de asistencia desde el panel de administración.  
+![Alt text](https://github.com/M147D/Pr-cticas_AMA/blob/main/Informe_Practica03/Capturas/Proyecto%2003%20(2).png "a title")  
+
+Validación de regsitro de asistencia en caso de estar fuera del rango.  
+![Alt text](https://github.com/M147D/Pr-cticas_AMA/blob/main/Informe_Practica03/Capturas/Proyecto%2003%20(3).png "a title")  
