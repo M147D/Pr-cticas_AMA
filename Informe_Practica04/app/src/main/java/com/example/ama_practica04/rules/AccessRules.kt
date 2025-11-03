@@ -1,6 +1,6 @@
-package com.example.ama_practica03.rules
+package com.example.ama_practica04.rules
 
-import com.example.ama_practica03.models.*
+import com.example.ama_practica04.models.*
 
 /**
  * Objeto que contiene reglas de acceso y funciones de orden superior

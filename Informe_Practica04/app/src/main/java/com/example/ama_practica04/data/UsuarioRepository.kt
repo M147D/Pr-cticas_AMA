@@ -1,10 +1,15 @@
-package com.example.ama_practica03.data
+package com.example.ama_practica04.data
 
-import com.example.ama_practica03.models.*
+import com.example.ama_practica04.models.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Repositorio de usuarios
  * Contiene datos de ejemplo y métodos para acceder a ellos
+ *
+ * Implementa el patrón publicador-suscriptor para registros de acceso
  */
 object UsuarioRepository {
 
@@ -14,15 +19,15 @@ object UsuarioRepository {
     private val usuarios = mutableListOf(
         Usuario(
             id = 1,
-            nombre = "Juan Pérez",
+            nombre = "Juan Perez",
             correo = "juan.perez@example.com",
             edad = 25,
-            rol = Rol.ADMIN,
+            rol = Rol.USER,
             enabled = true
         ),
         Usuario(
             id = 2,
-            nombre = "María García",
+            nombre = "Maria Garcia",
             correo = "maria.garcia@example.com",
             edad = 30,
             rol = Rol.USER,
@@ -30,7 +35,7 @@ object UsuarioRepository {
         ),
         Usuario(
             id = 3,
-            nombre = "Pedro Rodríguez",
+            nombre = "Pedro Rodriguez",
             correo = "pedro.rodriguez@example.com",
             edad = 22,
             rol = Rol.USER,
@@ -46,7 +51,7 @@ object UsuarioRepository {
         ),
         Usuario(
             id = 5,
-            nombre = "Carlos Martínez",
+            nombre = "Carlos Martinez",
             correo = "carlos.martinez@example.com",
             edad = 35,
             rol = Rol.ADMIN,
@@ -54,7 +59,7 @@ object UsuarioRepository {
         ),
         Usuario(
             id = 6,
-            nombre = "Laura Sánchez",
+            nombre = "Laura Sanchez",
             correo = "laura.sanchez@example.com",
             edad = 28,
             rol = Rol.USER,
@@ -82,6 +87,25 @@ object UsuarioRepository {
      * Lista de registros de acceso de ejemplo
      */
     private val registrosAcceso = mutableListOf<RegistroAcceso>()
+
+    /**
+     * StateFlow privado mutable para publicar registros actualizados
+     */
+    private val _recordsFlow = MutableStateFlow<List<RegistroAcceso>>(emptyList())
+
+    /**
+     * Publicador: recordsFlow
+     *
+     * StateFlow de solo lectura que publica la lista actualizada de registros de acceso.
+     * Cada vez que se agrega, modifica o elimina un registro, este Flow emite
+     * una nueva lista actualizada.
+     *
+     * Los suscriptores pueden observar cambios en tiempo real sin necesidad
+     * de consultar manualmente el repositorio.
+     *
+     * @return StateFlow<List<RegistroAcceso>> que emite la lista actualizada de registros
+     */
+    val recordsFlow: StateFlow<List<RegistroAcceso>> = _recordsFlow.asStateFlow()
 
     // Inicialización de registros de ejemplo
     init {
@@ -118,6 +142,9 @@ object UsuarioRepository {
                 marcaTiempo = System.currentTimeMillis() - 5400000 // Hace 1.5 horas
             )
         )
+
+        // Publicar registros iniciales
+        _recordsFlow.value = registrosAcceso.toList()
     }
 
     // ==================== MÉTODOS DE ACCESO ====================
@@ -150,9 +177,12 @@ object UsuarioRepository {
 
     /**
      * Agrega un nuevo registro de acceso
+     * Publica la lista actualizada a todos los suscriptores de recordsFlow
      */
     fun agregarRegistroAcceso(registro: RegistroAcceso) {
         registrosAcceso.add(registro)
+        // Publicar actualización a los suscriptores
+        _recordsFlow.value = registrosAcceso.toList()
     }
 
     /**
@@ -239,9 +269,12 @@ object UsuarioRepository {
 
     /**
      * Limpia todos los registros de acceso
+     * Publica la lista vacía a todos los suscriptores de recordsFlow
      */
     fun limpiarRegistros() {
         registrosAcceso.clear()
+        // Publicar actualización a los suscriptores
+        _recordsFlow.value = emptyList()
     }
 
     /**

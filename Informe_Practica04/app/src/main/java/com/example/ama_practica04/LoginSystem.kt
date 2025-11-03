@@ -1,42 +1,56 @@
-package com.example.ama_practica03
+package com.example.ama_practica04
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ama_practica03.data.UsuarioRepository
-import com.example.ama_practica03.models.Usuario
-import com.example.ama_practica03.models.AccionAsistencia
-import com.example.ama_practica03.models.Ubicacion
-import com.example.ama_practica03.models.RegistroAcceso
-import com.example.ama_practica03.models.isEnabled
-import com.example.ama_practica03.models.isAdmin
-import com.example.ama_practica03.models.displayName
-import com.example.ama_practica03.models.formatear
-import com.example.ama_practica03.rules.PolicyRules
-import java.text.SimpleDateFormat
-import java.util.*
+import com.example.ama_practica04.data.UsuarioRepository
+import com.example.ama_practica04.models.Usuario
+import com.example.ama_practica04.models.AccionAsistencia
+import com.example.ama_practica04.models.RegistroAcceso
+import com.example.ama_practica04.models.isEnabled
+import com.example.ama_practica04.models.isAdmin
+import com.example.ama_practica04.models.displayName
+import com.example.ama_practica04.models.formatear
+import com.example.ama_practica04.rules.PolicyRules
+import kotlin.collections.filter
+import kotlin.collections.find
+import kotlin.collections.forEach
+import kotlin.collections.isNotEmpty
+import kotlin.collections.reversed
+import kotlin.collections.take
+import kotlin.ranges.rangeTo
+import kotlin.text.contains
+import kotlin.text.equals
+import kotlin.text.isBlank
+import kotlin.text.isNotBlank
+import kotlin.text.isNotEmpty
 
 // ==================== PANTALLA DE LOGIN ====================
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(onLoginSuccess: (Usuario) -> Unit) {
+fun LoginScreen(onLoginSuccess: (Usuario) -> Unit, onBack: () -> Unit) {
     val usuarios = remember { UsuarioRepository.obtenerTodosLosUsuarios() }
     val usuariosActivos = usuarios.filter { it.isEnabled() }
 
@@ -51,25 +65,41 @@ fun LoginScreen(onLoginSuccess: (Usuario) -> Unit) {
         } else {
             usuariosActivos.filter { usuario ->
                 usuario.nombre.contains(nombreUsuario, ignoreCase = true) ||
-                usuario.correo.contains(nombreUsuario, ignoreCase = true)
+                        usuario.correo.contains(nombreUsuario, ignoreCase = true)
             }
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Person,
-            contentDescription = "Login",
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Sistema de Asistencia") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Login",
+                modifier = Modifier.size(80.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -151,7 +181,7 @@ fun LoginScreen(onLoginSuccess: (Usuario) -> Unit) {
                 colors = CardDefaults.cardColors(
                     containerColor = Color(0xFFF44336).copy(alpha = 0.1f)
                 ),
-                border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFF44336))
+                border = BorderStroke(2.dp, Color(0xFFF44336))
             ) {
                 Text(
                     text = mensajeError,
@@ -187,105 +217,93 @@ fun LoginScreen(onLoginSuccess: (Usuario) -> Unit) {
             }
         }
 
-        // Ayuda de usuarios disponibles
-        if (nombreUsuario.isBlank() && usuariosActivos.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(24.dp))
+            // Ayuda de usuarios disponibles
+            if (nombreUsuario.isBlank() && usuariosActivos.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "Usuarios disponibles:",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Gray,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            usuariosActivos.take(6).forEach { usuario ->
                 Text(
-                    text = "• ${usuario.nombre} ${if (usuario.isAdmin()) "(Admin)" else ""}",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            if (usuariosActivos.size > 6) {
-                Text(
-                    text = "... y ${usuariosActivos.size - 6} más",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun UsuarioCard(usuario: Usuario, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (usuario.isAdmin())
-                MaterialTheme.colorScheme.primaryContainer
-            else
-                MaterialTheme.colorScheme.secondaryContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = usuario.displayName(),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = usuario.correo,
+                    text = "Usuarios disponibles:",
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = if (usuario.isAdmin()) "Administrador" else "Usuario",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = if (usuario.isAdmin())
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.secondary
-                )
-            }
 
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                usuariosActivos.take(6).forEach { usuario ->
+                    Text(
+                        text = "• ${usuario.nombre} ${if (usuario.isAdmin()) "(Admin)" else ""}",
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                if (usuariosActivos.size > 6) {
+                    Text(
+                        text = "... y ${usuariosActivos.size - 6} más",
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         }
     }
 }
 
 // ==================== PANTALLA DE USUARIO ====================
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
+    val context = LocalContext.current
+
+    // ViewModel con estado reactivo
+    val viewModel = remember {
+        com.example.ama_practica04.viewmodel.RegistroViewModel(initialUsuario = usuario)
+    }
+
+    // SUSCRIPTOR: Observar StateFlow<AppState>
+    val appState by viewModel.appState.collectAsState()
+
+    // Estados locales de UI
     var accionSeleccionada by remember { mutableStateOf(AccionAsistencia.ENTRADA) }
-    var ubicacionDentro by remember { mutableStateOf(true) }
-    var horaActual by remember { mutableStateOf(PolicyRules.obtenerHoraActual()) }
-    var mensajeResultado by remember { mutableStateOf("") }
-    var colorResultado by remember { mutableStateOf(Color.Gray) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Gateway de notificaciones locales
+    val notificationGateway = remember {
+        com.example.ama_practica04.flow.NotificationGatewayLocal(context)
+    }
+
+    // SUSCRIPTOR: Observar SharedFlow<AppEvent> para eventos
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            // Procesar evento en el gateway de notificaciones
+            notificationGateway.procesarEvento(event)
+
+            // Además manejar eventos de UI (Snackbar/Toast)
+            when (event) {
+                is com.example.ama_practica04.flow.AppEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        actionLabel = event.actionLabel,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+                is com.example.ama_practica04.flow.AppEvent.ShowToast -> {
+                    android.widget.Toast.makeText(
+                        context,
+                        event.message,
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+                else -> {
+                    // Otros eventos ya se procesan en notificationGateway
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -293,11 +311,12 @@ fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
                 title = { Text("Registro de Asistencia") },
                 actions = {
                     IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión")
+                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar sesión")
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -401,10 +420,10 @@ fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
-                    onClick = { ubicacionDentro = true },
+                    onClick = { viewModel.actualizarUbicacion(true) },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (ubicacionDentro)
+                        containerColor = if (appState.ubicacion.estaDentroDelRango())
                             Color(0xFF4CAF50)
                         else
                             Color.Gray
@@ -414,10 +433,10 @@ fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
                 }
 
                 Button(
-                    onClick = { ubicacionDentro = false },
+                    onClick = { viewModel.actualizarUbicacion(false) },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (!ubicacionDentro)
+                        containerColor = if (!appState.ubicacion.estaDentroDelRango())
                             Color(0xFFF44336)
                         else
                             Color.Gray
@@ -430,17 +449,17 @@ fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Selector de hora (para pruebas)
-            Text(text = "Hora (para pruebas): $horaActual:00", fontWeight = FontWeight.Medium)
+            Text(text = "Hora (para pruebas): ${appState.hora}:00", fontWeight = FontWeight.Medium)
             Slider(
-                value = horaActual.toFloat(),
-                onValueChange = { horaActual = it.toInt() },
+                value = appState.hora.toFloat(),
+                onValueChange = { viewModel.actualizarHora(it.toInt()) },
                 valueRange = 0f..23f,
                 steps = 22
             )
             Text(
-                text = PolicyRules.obtenerMensajeHorario(horaActual),
+                text = PolicyRules.obtenerMensajeHorario(appState.hora),
                 fontSize = 12.sp,
-                color = if (PolicyRules.esHorarioValido(horaActual))
+                color = if (PolicyRules.esHorarioValido(appState.hora))
                     Color(0xFF4CAF50)
                 else
                     Color(0xFFF44336)
@@ -448,59 +467,58 @@ fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón de registro
+            // Botón de registro - HABILITACIÓN REACTIVA
             Button(
                 onClick = {
-                    val ubicacion = if (ubicacionDentro)
-                        Ubicacion.DentroDelRango("Campus Principal")
-                    else
-                        Ubicacion.FueraDelRango("Fuera del área permitida")
-
-                    val context = PolicyRules.RegistroContext(
-                        usuario = usuario,
-                        ubicacion = ubicacion,
-                        hora = horaActual
-                    )
-
-                    val resultado = PolicyRules.evaluarRegistro(context)
-                    mensajeResultado = "${resultado.mensaje}\n${resultado.razon}"
-                    colorResultado = if (resultado.permitido) Color(0xFF4CAF50) else Color(0xFFF44336)
-
-                    if (resultado.permitido) {
-                        // Registrar la asistencia
-                        val registro = RegistroAcceso(
-                            usuario = usuario,
-                            accion = accionSeleccionada,
-                            ubicacion = ubicacion,
-                            marcaTiempo = System.currentTimeMillis()
-                        )
-                        UsuarioRepository.agregarRegistroAcceso(registro)
-                    }
+                    // Delegar al ViewModel
+                    viewModel.registrarAsistencia(accionSeleccionada)
                 },
+                enabled = appState.canRegister,  // ← CONTROL REACTIVO DEL BOTÓN
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = if (appState.canRegister)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        Color.Gray
                 )
             ) {
-                Text("REGISTRAR ASISTENCIA", fontSize = 16.sp)
+                Text(
+                    text = if (appState.canRegister)
+                        "REGISTRAR ASISTENCIA"
+                    else
+                        "REGISTRO NO DISPONIBLE",
+                    fontSize = 16.sp
+                )
             }
 
-            // Resultado
-            if (mensajeResultado.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = colorResultado.copy(alpha = 0.1f)
-                    ),
-                    border = androidx.compose.foundation.BorderStroke(2.dp, colorResultado)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+            // Evaluación reactiva - Siempre visible
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (appState.canRegister)
+                        Color(0xFF4CAF50).copy(alpha = 0.1f)
+                    else
+                        Color(0xFFF44336).copy(alpha = 0.1f)
+                ),
+                border = BorderStroke(
+                    2.dp,
+                    if (appState.canRegister) Color(0xFF4CAF50) else Color(0xFFF44336)
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = appState.evaluacion.mensaje,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (appState.canRegister) Color(0xFF4CAF50) else Color(0xFFF44336)
+                    )
+                    if (appState.evaluacion.razon.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = mensajeResultado,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResultado
+                            text = appState.evaluacion.razon,
+                            fontSize = 14.sp,
+                            color = Color.Gray
                         )
                     }
                 }
@@ -508,9 +526,9 @@ fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Mis registros
+            // Mis registros - REACTIVO
             Text(
-                text = "MIS REGISTROS",
+                text = "MIS REGISTROS (${appState.misRegistros.size})",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -518,15 +536,15 @@ fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val misRegistros = UsuarioRepository.obtenerRegistrosPorUsuario(usuario.id)
-            if (misRegistros.isEmpty()) {
+            // Usar registros del estado reactivo
+            if (appState.misRegistros.isEmpty()) {
                 Text(
                     text = "No tienes registros aún",
                     color = Color.Gray,
                     modifier = Modifier.padding(16.dp)
                 )
             } else {
-                misRegistros.reversed().take(5).forEach { registro ->
+                appState.misRegistros.reversed().take(5).forEach { registro ->
                     RegistroCard(registro)
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -548,7 +566,7 @@ fun AdminScreen(usuario: Usuario, onLogout: () -> Unit) {
                 title = { Text("Panel de Administración") },
                 actions = {
                     IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión")
+                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar sesión")
                     }
                 }
             )
@@ -715,7 +733,7 @@ fun RegistroCard(registro: RegistroAcceso) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp)),
+            .border(2.dp, borderColor, androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
         colors = CardDefaults.cardColors(
             containerColor = if (esValido)
                 Color(0xFF4CAF50).copy(alpha = 0.1f)

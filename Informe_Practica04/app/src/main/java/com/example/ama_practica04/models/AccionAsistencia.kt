@@ -1,4 +1,4 @@
-package com.example.ama_practica03.models
+package com.example.ama_practica04.models
 
 /**
  * Enum class para las acciones de asistencia

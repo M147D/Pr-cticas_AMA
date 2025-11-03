@@ -1,16 +1,16 @@
-package com.example.ama_practica03.rules
+package com.example.ama_practica04.rules
 
-import com.example.ama_practica03.models.Usuario
-import com.example.ama_practica03.models.Ubicacion
-import com.example.ama_practica03.models.isEnabled
-import com.example.ama_practica03.models.allowedAt
-import com.example.ama_practica03.models.isAdmin
-import com.example.ama_practica03.models.displayName
+import com.example.ama_practica04.models.Usuario
+import com.example.ama_practica04.models.Ubicacion
+import com.example.ama_practica04.models.isEnabled
+import com.example.ama_practica04.models.allowedAt
+import com.example.ama_practica04.models.isAdmin
+import com.example.ama_practica04.models.displayName
 import java.util.Calendar
 
 /**
  * Tipo de función para representar una regla
- * Una regla es una función que toma un contexto y devuelve un booleano
+ * La regla es la función que toma un contexto y devuelve un booleano
  */
 typealias Rule<T> = (T) -> Boolean
 

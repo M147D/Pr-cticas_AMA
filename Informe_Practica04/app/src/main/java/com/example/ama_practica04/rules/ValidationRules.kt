@@ -1,7 +1,7 @@
-package com.example.ama_practica03.rules
+package com.example.ama_practica04.rules
 
-import com.example.ama_practica03.models.Usuario
-import com.example.ama_practica03.models.Rol
+import com.example.ama_practica04.models.Usuario
+import com.example.ama_practica04.models.Rol
 
 /**
  * Objeto que contiene funciones de orden superior y lambdas

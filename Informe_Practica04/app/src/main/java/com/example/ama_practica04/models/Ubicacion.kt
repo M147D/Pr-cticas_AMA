@@ -1,4 +1,4 @@
-package com.example.ama_practica03.models
+package com.example.ama_practica04.models
 
 /**
  * Sealed class para representar la ubicación

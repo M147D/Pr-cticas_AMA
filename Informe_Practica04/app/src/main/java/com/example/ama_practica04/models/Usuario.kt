@@ -1,4 +1,4 @@
-package com.example.ama_practica03.models
+package com.example.ama_practica04.models
 
 /**
  * Enumeración para el rol del usuario
