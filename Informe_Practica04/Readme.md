@@ -35,11 +35,11 @@ del proceso, especialmente para datos críticos como el usuario autenticado o re
 cualquier parte de la app (ej: sesión expirada, cambios de configuración), evitando pasar callbacks entre múltiples niveles de composición.
 
 ### Capturas
-Visualización de registros de asistencia inhabilitación por fuera de horario.
+Visualización de registros de asistencia inhabilitación por fuera de horario.  
 ![Alt text](https://github.com/M147D/Pr-cticas_AMA/blob/main/Informe_Practica04/capturas/Proyecto%2004%20(1).png "a title")  
 
-Visualización de registros de asistencia inhabilitación por estar fuera del rango.
+Visualización de registros de asistencia inhabilitación por estar fuera del rango.  
 ![Alt text](https://github.com/M147D/Pr-cticas_AMA/blob/main/Informe_Practica04/capturas/Proyecto%2004%20(2).png "a title")  
 
-Validación de registro de asistencia cuando se cumplen los paramétros.
+Validación de registro de asistencia cuando se cumplen los paramétros.  
 ![Alt text](https://github.com/M147D/Pr-cticas_AMA/blob/main/Informe_Practica04/capturas/Proyecto%2004%20(3).png "a title")  
