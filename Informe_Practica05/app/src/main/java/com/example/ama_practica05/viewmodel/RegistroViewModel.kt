@@ -215,7 +215,7 @@ class RegistroViewModel(
                     AppEvent.Notify(
                         title = "Registro no permitido",
                         body = evaluacion.mensaje,
-                        type = com.example.ama_practica04.flow.NotificationType.ERROR
+                        type = com.example.ama_practica05.flow.NotificationType.ERROR
                     )
                 )
             }

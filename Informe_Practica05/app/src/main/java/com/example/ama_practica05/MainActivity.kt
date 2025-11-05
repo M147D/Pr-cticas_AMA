@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -31,6 +32,10 @@ import java.util.Calendar
 import java.util.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.fillMaxWidth
+import android.util.Log
+import androidx.core.content.edit
+import com.example.ama_practica05.firebase.FirebaseConfig
+import com.example.ama_practica05.firebase.NotificationService
 
 // ============================================
 // PRÁCTICA 03: Conceptos de Kotlin con Compose
@@ -38,7 +43,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 
 // 1. VARIABLES CON DIFERENTES TIPOS
 // Declaración de variables con al menos 5 tipos diferentes
-val enteroInmutable: Int = 42
+var enteroInmutable: Int = 42
 var numeroDecimal: Double = 3.14159
 var textoMutable: String = "Hola Kotlin"
 var esVerdadero: Boolean = true
@@ -85,9 +90,37 @@ fun UsuarioPractica02.esMayorDeEdad(): Boolean {
 }
 
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+
+    // Launcher para solicitar permisos de notificación (API moderna)
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.d(TAG, "Permiso de notificaciones concedido")
+        } else {
+            Log.w(TAG, "Permiso de notificaciones denegado")
+            Toast.makeText(
+                this,
+                "Se requiere permiso de notificaciones para recibir mensajes",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Inicializar Firebase
+        initializeFirebase()
+
+        // Solicitar permisos de notificación (Android 13+)
+        requestNotificationPermission()
+
         setContent {
             AMA_Practica04Theme {
                 Surface(
@@ -97,6 +130,81 @@ class MainActivity : ComponentActivity() {
                     AppNavigation()
                 }
             }
+        }
+    }
+
+    /**
+     * Inicializa Firebase y obtiene el token de FCM
+     */
+    private fun initializeFirebase() {
+        Log.d(TAG, "Inicializando Firebase...")
+
+        // Inicializar Firebase
+        FirebaseConfig.initialize(this)
+
+        // Crear servicio de notificaciones
+        val notificationService = NotificationService(this)
+
+        // Obtener el token de FCM
+        FirebaseConfig.getToken { token ->
+            if (token != null) {
+                Log.d(TAG, "Token de FCM obtenido: $token")
+                Log.d(TAG, "Token completo para pruebas: $token")
+
+                // Mostrar notificación con el token (para debug)
+                if (FirebaseConfig.debugMode) {
+                    notificationService.showNotification(
+                        title = "Firebase Inicializado",
+                        message = "Token FCM registrado correctamente",
+                        channelId = NotificationService.CHANNEL_ID_DEFAULT,
+                        notificationId = 9999
+                    )
+                }
+
+                // Guardar el token en SharedPreferences
+                saveTokenLocally(token)
+
+            } else {
+                Log.e(TAG, "Error: No se pudo obtener el token de FCM")
+                Toast.makeText(
+                    this,
+                    "Error al obtener token de FCM",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        // Suscribirse al tópico de todos los usuarios
+        FirebaseConfig.subscribeToTopic(
+            topic = FirebaseConfig.Topics.ALL_USERS,
+            onSuccess = {
+                Log.d(TAG, "Suscrito exitosamente al tópico: ${FirebaseConfig.Topics.ALL_USERS}")
+            },
+            onError = { error ->
+                Log.e(TAG, "Error al suscribirse al tópico: ${error.message}")
+            }
+        )
+    }
+
+    /**
+     * Guarda el token localmente en SharedPreferences usando KTX
+     */
+    private fun saveTokenLocally(token: String) {
+        getSharedPreferences("FCM_PREFS", MODE_PRIVATE).edit {
+            putString("FCM_TOKEN", token)
+        }
+        Log.d(TAG, "Token guardado localmente")
+    }
+
+    /**
+     * Solicita permisos de notificación en Android 13+ usando API moderna
+     */
+    private fun requestNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            // Para versiones anteriores a Android 13, los permisos se conceden automáticamente
+            Log.d(TAG, "Permiso de notificaciones no requerido para esta versión de Android")
         }
     }
 }
@@ -185,7 +293,7 @@ fun MenuPrincipal(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Práctica 04",
+            text = "Práctica 05",
             fontSize = 18.sp,
             color = Color.Gray
         )
@@ -329,10 +437,14 @@ fun MainScreenPractica02(onBack: () -> Unit) {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Volver"
+                            contentDescription = "Volver al menú principal"
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingValues ->

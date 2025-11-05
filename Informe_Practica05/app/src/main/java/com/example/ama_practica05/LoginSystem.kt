@@ -261,7 +261,7 @@ fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
 
     // ViewModel con estado reactivo
     val viewModel = remember {
-        com.example.ama_practica04.viewmodel.RegistroViewModel(initialUsuario = usuario)
+        com.example.ama_practica05.viewmodel.RegistroViewModel(initialUsuario = usuario)
     }
 
     // SUSCRIPTOR: Observar StateFlow<AppState>
@@ -273,7 +273,7 @@ fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
 
     // Gateway de notificaciones locales
     val notificationGateway = remember {
-        com.example.ama_practica04.flow.NotificationGatewayLocal(context)
+        com.example.ama_practica05.flow.NotificationGatewayLocal(context)
     }
 
     // SUSCRIPTOR: Observar SharedFlow<AppEvent> para eventos
@@ -284,14 +284,14 @@ fun UserScreen(usuario: Usuario, onLogout: () -> Unit) {
 
             // Además manejar eventos de UI (Snackbar/Toast)
             when (event) {
-                is com.example.ama_practica04.flow.AppEvent.ShowSnackbar -> {
+                is com.example.ama_practica05.flow.AppEvent.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(
                         message = event.message,
                         actionLabel = event.actionLabel,
                         duration = SnackbarDuration.Short
                     )
                 }
-                is com.example.ama_practica04.flow.AppEvent.ShowToast -> {
+                is com.example.ama_practica05.flow.AppEvent.ShowToast -> {
                     android.widget.Toast.makeText(
                         context,
                         event.message,
