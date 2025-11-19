@@ -3,6 +3,7 @@ package com.example.ama_practica06
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,6 +38,7 @@ import androidx.core.content.edit
 import com.example.ama_practica06.firebase.FirebaseConfig
 import com.example.ama_practica06.firebase.NotificationService
 import com.example.ama_practica06.auth.GoogleSignInNavigation
+import kotlinx.coroutines.launch
 
 // ============================================
 // PRÁCTICA 03: Conceptos de Kotlin con Compose
@@ -137,55 +139,67 @@ class MainActivity : ComponentActivity() {
 
     /**
      * Inicializa Firebase y obtiene el token de FCM
+     * FCM es opcional - la app funcionará correctamente aunque falle
      */
     private fun initializeFirebase() {
-        Log.d(TAG, "Inicializando Firebase...")
+        try {
+            Log.d(TAG, "Inicializando Firebase...")
 
-        // Inicializar Firebase
-        FirebaseConfig.initialize(this)
+            // Inicializar Firebase
+            FirebaseConfig.initialize(this)
 
-        // Crear servicio de notificaciones
-        val notificationService = NotificationService(this)
+            // Crear servicio de notificaciones
+            val notificationService = NotificationService(this)
 
-        // Obtener el token de FCM
-        FirebaseConfig.getToken { token ->
-            if (token != null) {
-                Log.d(TAG, "Token de FCM obtenido: $token")
-                Log.d(TAG, "Token completo para pruebas: $token")
+            // Obtener el token de FCM (opcional - no bloquea la app)
+            FirebaseConfig.getToken { token ->
+                if (token != null) {
+                    Log.d(TAG, "Token de FCM obtenido exitosamente")
+                    Log.d(TAG, "Token completo para pruebas: $token")
 
-                // Mostrar notificación con el token (para debug)
-                if (FirebaseConfig.debugMode) {
-                    notificationService.showNotification(
-                        title = "Firebase Inicializado",
-                        message = "Token FCM registrado correctamente",
-                        channelId = NotificationService.CHANNEL_ID_DEFAULT,
-                        notificationId = 9999
+                    // Mostrar notificación con el token (solo en modo debug)
+                    if (FirebaseConfig.debugMode) {
+                        try {
+                            notificationService.showNotification(
+                                title = "Firebase Inicializado",
+                                message = "Token FCM registrado correctamente",
+                                channelId = NotificationService.CHANNEL_ID_DEFAULT,
+                                notificationId = 9999
+                            )
+                        } catch (e: Exception) {
+                            Log.w(TAG, "No se pudo mostrar notificación de debug: ${e.message}")
+                        }
+                    }
+
+                    // Guardar el token en SharedPreferences
+                    saveTokenLocally(token)
+
+                    // Suscribirse al tópico de todos los usuarios
+                    FirebaseConfig.subscribeToTopic(
+                        topic = FirebaseConfig.Topics.ALL_USERS,
+                        onSuccess = {
+                            Log.d(TAG, "Suscrito exitosamente al tópico: ${FirebaseConfig.Topics.ALL_USERS}")
+                        },
+                        onError = { error ->
+                            Log.w(TAG, "No se pudo suscribir al tópico: ${error.message}")
+                        }
                     )
+
+                } else {
+                    // FCM no disponible - la app continuará funcionando normalmente
+                    Log.w(TAG, "No se pudo obtener el token de FCM. Esto puede deberse a:")
+                    Log.w(TAG, "- Google Play Services no disponible o desactualizado")
+                    Log.w(TAG, "- Sin conexión a Internet")
+                    Log.w(TAG, "- Configuración de Firebase incompleta")
+                    Log.w(TAG, "La aplicación continuará funcionando sin notificaciones push")
                 }
-
-                // Guardar el token en SharedPreferences
-                saveTokenLocally(token)
-
-            } else {
-                Log.e(TAG, "Error: No se pudo obtener el token de FCM")
-                Toast.makeText(
-                    this,
-                    "Error al obtener token de FCM",
-                    Toast.LENGTH_SHORT
-                ).show()
             }
+
+        } catch (e: Exception) {
+            // Error al inicializar Firebase - la app continuará funcionando
+            Log.e(TAG, "Error al inicializar Firebase: ${e.message}", e)
+            Log.w(TAG, "La aplicación continuará funcionando sin Firebase Cloud Messaging")
         }
-
-        // Suscribirse al tópico de todos los usuarios
-        FirebaseConfig.subscribeToTopic(
-            topic = FirebaseConfig.Topics.ALL_USERS,
-            onSuccess = {
-                Log.d(TAG, "Suscrito exitosamente al tópico: ${FirebaseConfig.Topics.ALL_USERS}")
-            },
-            onError = { error ->
-                Log.e(TAG, "Error al suscribirse al tópico: ${error.message}")
-            }
-        )
     }
 
     /**
@@ -217,57 +231,117 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 fun AppNavigation() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     var usuarioActual by remember { mutableStateOf<Usuario?>(null) }
     var pantalla by remember { mutableStateOf("menu") }
+    var mostrarGoogleSignIn by remember { mutableStateOf(false) }
 
-    when (pantalla) {
-        "menu" -> {
-            MenuPrincipal(
-                onPractica02Click = { pantalla = "practica02" },
-                onSistemaAsistenciaClick = { pantalla = "login" },
-                onGoogleSignInClick = { pantalla = "googleSignIn" }
-            )
+    // Crear instancia del auth manager para Google Sign-In
+    val authManager = remember { com.example.ama_practica06.auth.GoogleAuthManager(context) }
+    val authState by authManager.authState.collectAsState()
+
+    // Launcher para manejar el resultado del Google Sign-In
+    val signInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            scope.launch {
+                authManager.handleSignInResult(result.data)
+            }
+        } else {
+            scope.launch {
+                authManager.handleSignInResult(null)
+            }
         }
-        "login" -> {
-            LoginScreen(
-                onLoginSuccess = { usuario ->
-                    usuarioActual = usuario
-                    pantalla = if (usuario.isAdmin()) "admin" else "user"
-                },
-                onBack = { pantalla = "menu" }
-            )
+    }
+
+    // Manejar autenticación exitosa con Google
+    LaunchedEffect(authState) {
+        if (authState is com.example.ama_practica06.auth.AuthState.Authenticated) {
+            val googleUser = (authState as com.example.ama_practica06.auth.AuthState.Authenticated).user
+            // Convertir GoogleUserInfo a Usuario para el sistema de asistencia
+            usuarioActual = googleUser.toUsuario()
+            mostrarGoogleSignIn = false
+            // Redirigir a la pantalla correspondiente
+            pantalla = if (usuarioActual!!.isAdmin()) "admin" else "user"
         }
-        "user" -> {
-            usuarioActual?.let { usuario ->
-                UserScreen(
-                    usuario = usuario,
-                    onLogout = {
-                        usuarioActual = null
-                        pantalla = "login"
+    }
+
+    // Mostrar pantalla de Google Sign-In si está activado
+    if (mostrarGoogleSignIn) {
+        com.example.ama_practica06.auth.LoginScreen(
+            authState = authState,
+            onSignInClick = {
+                authManager.signIn(signInLauncher)
+            },
+            onBack = {
+                mostrarGoogleSignIn = false
+                scope.launch {
+                    authManager.signOut()
+                }
+            }
+        )
+    } else {
+        when (pantalla) {
+            "menu" -> {
+                MenuPrincipal(
+                    onPractica02Click = { pantalla = "practica02" },
+                    onSistemaAsistenciaClick = { pantalla = "login" },
+                    onGoogleSignInClick = { pantalla = "googleSignIn" }
+                )
+            }
+            "login" -> {
+                LoginScreen(
+                    onLoginSuccess = { usuario ->
+                        usuarioActual = usuario
+                        pantalla = if (usuario.isAdmin()) "admin" else "user"
+                    },
+                    onBack = { pantalla = "menu" },
+                    onGoogleSignInClick = {
+                        mostrarGoogleSignIn = true
                     }
                 )
             }
-        }
-        "admin" -> {
-            usuarioActual?.let { usuario ->
-                AdminScreen(
-                    usuario = usuario,
-                    onLogout = {
-                        usuarioActual = null
-                        pantalla = "login"
-                    }
+            "user" -> {
+                usuarioActual?.let { usuario ->
+                    UserScreen(
+                        usuario = usuario,
+                        onLogout = {
+                            usuarioActual = null
+                            pantalla = "login"
+                            scope.launch {
+                                authManager.signOut()
+                            }
+                        }
+                    )
+                }
+            }
+            "admin" -> {
+                usuarioActual?.let { usuario ->
+                    AdminScreen(
+                        usuario = usuario,
+                        onLogout = {
+                            usuarioActual = null
+                            pantalla = "login"
+                            scope.launch {
+                                authManager.signOut()
+                            }
+                        }
+                    )
+                }
+            }
+            "practica02" -> {
+                MainScreenPractica02(
+                    onBack = { pantalla = "menu" }
                 )
             }
-        }
-        "practica02" -> {
-            MainScreenPractica02(
-                onBack = { pantalla = "menu" }
-            )
-        }
-        "googleSignIn" -> {
-            GoogleSignInNavigation(
-                onBack = { pantalla = "menu" }
-            )
+            "googleSignIn" -> {
+                GoogleSignInNavigation(
+                    onBack = { pantalla = "menu" }
+                )
+            }
         }
     }
 }

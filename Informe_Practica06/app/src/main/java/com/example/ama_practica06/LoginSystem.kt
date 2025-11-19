@@ -50,7 +50,11 @@ import kotlin.text.isNotEmpty
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(onLoginSuccess: (Usuario) -> Unit, onBack: () -> Unit) {
+fun LoginScreen(
+    onLoginSuccess: (Usuario) -> Unit,
+    onBack: () -> Unit,
+    onGoogleSignInClick: () -> Unit = {}
+) {
     val usuarios = remember { UsuarioRepository.obtenerTodosLosUsuarios() }
     val usuariosActivos = usuarios.filter { it.isEnabled() }
 
@@ -171,6 +175,52 @@ fun LoginScreen(onLoginSuccess: (Usuario) -> Unit, onBack: () -> Unit) {
             )
         ) {
             Text("INGRESAR", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Divisor
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HorizontalDivider(modifier = Modifier.weight(1f))
+            Text(
+                text = "O",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = Color.Gray,
+                fontSize = 14.sp
+            )
+            HorizontalDivider(modifier = Modifier.weight(1f))
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Botón de Google Sign-In
+        OutlinedButton(
+            onClick = onGoogleSignInClick,
+            modifier = Modifier.fillMaxWidth(),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(vertical = 4.dp)
+            ) {
+                // Icono de Google (simplificado)
+                Text(
+                    text = "G",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4285F4),
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(
+                    text = "Iniciar sesión con Google",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
 
         // Mensaje de error

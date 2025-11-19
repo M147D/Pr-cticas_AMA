@@ -268,6 +268,14 @@ object UsuarioRepository {
     }
 
     /**
+     * Busca un usuario por correo electrónico (búsqueda exacta)
+     * Útil para validar usuarios que inician sesión con Google
+     */
+    fun obtenerUsuarioPorCorreo(correo: String): Usuario? {
+        return usuarios.find { it.correo.equals(correo, ignoreCase = true) }
+    }
+
+    /**
      * Limpia todos los registros de acceso
      * Publica la lista vacía a todos los suscriptores de recordsFlow
      */
