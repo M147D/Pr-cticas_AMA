@@ -26,6 +26,7 @@ import com.example.ama_practica07.R
 @Composable
 fun WelcomeScreen(
     onGetStarted: () -> Unit,
+    onDevelopersClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     // Animación del logo
@@ -185,7 +186,21 @@ fun WelcomeScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Botón para desarrolladores/menú
+            TextButton(
+                onClick = onDevelopersClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Acerca de los desarrolladores",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Proyecto 01 AMA - 2025",

@@ -336,6 +336,9 @@ fun AppNavigation() {
                 com.example.ama_practica07.auth.WelcomeScreen(
                     onGetStarted = {
                         pantalla = "login"  // Ir a pantalla de login
+                    },
+                    onDevelopersClick = {
+                        pantalla = "menu"  // Ir al menú de información del proyecto
                     }
                 )
             }
@@ -343,7 +346,8 @@ fun AppNavigation() {
                 MenuPrincipal(
                     onPractica02Click = { pantalla = "practica02" },
                     onSistemaAsistenciaClick = { pantalla = "login" },
-                    onGoogleSignInClick = { pantalla = "googleSignIn" }
+                    onGoogleSignInClick = { pantalla = "googleSignIn" },
+                    onBack = { pantalla = "welcome" }
                 )
             }
             // MODIFICADO: Pantalla de Login (2/4 actividades)
@@ -351,12 +355,17 @@ fun AppNavigation() {
                 LoginScreen(
                     onLoginSuccess = { usuario ->
                         usuarioActual = usuario
-                        pantalla = if (usuario.isAdmin()) "admin" else "user"
+                        // MODIFICADO: Ir a home primero, igual que Google Sign-In
+                        pantalla = "home"
 
                         // NUEVO: Guardar sesión con el SessionManager para login tradicional
-                        // Nota: Para login tradicional, no hay FirebaseUser, así que solo
-                        // actualizamos el usuario actual. La persistencia completa solo
-                        // funciona con Google Sign-In que usa Firebase.
+                        scope.launch {
+                            sessionManager.saveTraditionalLogin(
+                                userId = usuario.id.toString(),
+                                email = usuario.correo,
+                                displayName = usuario.nombre
+                            )
+                        }
                     },
                     onBack = { pantalla = "welcome" },  // MODIFICADO: volver a welcome
                     onGoogleSignInClick = {
@@ -428,7 +437,7 @@ fun AppNavigation() {
                                 authManager.signOut()
                             }
                             usuarioActual = null
-                            pantalla = "menu"
+                            pantalla = "login"
                         },
                         onAccessSystemClick = {
                             // Ir al sistema de asistencia
@@ -449,7 +458,8 @@ fun AppNavigation() {
 fun MenuPrincipal(
     onPractica02Click: () -> Unit,
     onSistemaAsistenciaClick: () -> Unit,
-    onGoogleSignInClick: () -> Unit
+    onGoogleSignInClick: () -> Unit,
+    onBack: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -626,7 +636,20 @@ fun MenuPrincipal(
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Botón para volver
+        OutlinedButton(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Volver",
+                fontSize = 16.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = "Selecciona una opción para continuar",

@@ -41,41 +41,71 @@ class SessionManager(context: Context) {
     /**
      * Verifica si existe una sesión activa al iniciar la aplicación
      *
-     * Proceso:
-     * 1. Verifica si hay usuario autenticado en FirebaseAuth
-     * 2. Si existe, restaura la sesión
-     * 3. Si no existe, limpia datos locales y marca sesión como inactiva
+     * Proceso MODIFICADO para soportar login tradicional y Firebase:
+     * 1. Primero verifica si hay datos guardados localmente en DataStore
+     * 2. Si hay datos con UID que empieza con "local_" → es login tradicional
+     * 3. Si hay datos con UID normal → es login de Firebase
+     * 4. Solo limpia si NO hay ningún dato guardado
      */
     suspend fun checkActiveSession() {
         try {
             Log.d(TAG, "Verificando sesión activa...")
             _sessionState.value = SessionState.Loading
 
-            val currentUser = firebaseAuth.currentUser
+            // PASO 1: Verificar primero si hay datos guardados localmente
+            val sessionData = repository.getSessionData().first()
 
-            if (currentUser != null) {
-                Log.d(TAG, "Usuario autenticado encontrado en Firebase: ${currentUser.uid}")
+            if (sessionData != null) {
+                Log.d(TAG, "Datos de sesión encontrados: ${sessionData.firebaseUid}")
 
-                // Verificar si hay datos guardados localmente
-                val sessionData = repository.getSessionData().first()
+                // PASO 2: Verificar si es sesión tradicional o Firebase
+                if (sessionData.firebaseUid.startsWith("local_")) {
+                    // ✅ SESIÓN TRADICIONAL
+                    Log.d(TAG, "Restaurando sesión tradicional")
 
-                if (sessionData != null && sessionData.firebaseUid == currentUser.uid) {
-                    // Sesión válida - restaurar
-                    Log.d(TAG, "Restaurando sesión existente")
-                    val usuario = firebaseUserToUsuario(currentUser)
-                    _sessionState.value = SessionState.Active(usuario, currentUser.uid)
+                    val userId = sessionData.firebaseUid.removePrefix("local_").toIntOrNull()
 
-                    // Actualizar timestamp de último acceso
-                    repository.updateLastLogin()
+                    if (userId != null) {
+                        // Buscar usuario en UsuarioRepository
+                        val usuario = com.example.ama_practica07.data.UsuarioRepository
+                            .obtenerUsuarioPorId(userId)
+
+                        if (usuario != null && usuario.enabled) {
+                            // Sesión tradicional válida - restaurar
+                            _sessionState.value = SessionState.Active(usuario, sessionData.firebaseUid)
+                            repository.updateLastLogin()
+                            Log.d(TAG, "Sesión tradicional restaurada para: ${usuario.nombre}")
+                        } else {
+                            Log.w(TAG, "Usuario tradicional no encontrado o deshabilitado")
+                            repository.clearSessionData()
+                            _sessionState.value = SessionState.Inactive
+                        }
+                    } else {
+                        Log.e(TAG, "UID tradicional inválido")
+                        repository.clearSessionData()
+                        _sessionState.value = SessionState.Inactive
+                    }
                 } else {
-                    // Usuario de Firebase pero sin datos locales - crear nueva sesión
-                    Log.d(TAG, "Usuario de Firebase sin datos locales, creando sesión")
-                    startSession(currentUser)
+                    // ✅ SESIÓN DE FIREBASE
+                    Log.d(TAG, "Verificando sesión de Firebase")
+                    val currentUser = firebaseAuth.currentUser
+
+                    if (currentUser != null && sessionData.firebaseUid == currentUser.uid) {
+                        // Sesión Firebase válida - restaurar
+                        Log.d(TAG, "Restaurando sesión de Firebase")
+                        val usuario = firebaseUserToUsuario(currentUser)
+                        _sessionState.value = SessionState.Active(usuario, currentUser.uid)
+                        repository.updateLastLogin()
+                    } else {
+                        // Usuario de Firebase cerró sesión - limpiar
+                        Log.w(TAG, "Sesión de Firebase no coincide, limpiando")
+                        repository.clearSessionData()
+                        _sessionState.value = SessionState.Inactive
+                    }
                 }
             } else {
-                Log.d(TAG, "No hay usuario autenticado en Firebase")
-                // Limpiar cualquier dato local residual
-                repository.clearSessionData()
+                // No hay datos guardados - sesión inactiva
+                Log.d(TAG, "No hay datos de sesión guardados")
                 _sessionState.value = SessionState.Inactive
             }
 
@@ -178,5 +208,40 @@ class SessionManager(context: Context) {
             rol = Rol.USER, // Por defecto USER
             enabled = true
         )
+    }
+
+    /**
+     * Guarda una sesión para login tradicional (sin Firebase)
+     * Crea un UID sintético usando el userId
+     *
+     * @param userId ID del usuario del repositorio local
+     * @param email Correo del usuario
+     * @param displayName Nombre del usuario
+     */
+    suspend fun saveTraditionalLogin(
+        userId: String,
+        email: String,
+        displayName: String
+    ) {
+        try {
+            Log.d(TAG, "Guardando sesión de login tradicional para usuario: $userId")
+
+            // Crear un UID sintético para login tradicional
+            val syntheticUid = "local_$userId"
+
+            // Guardar datos de sesión en almacenamiento local
+            val sessionData = SessionData(
+                firebaseUid = syntheticUid,
+                email = email,
+                displayName = displayName,
+                lastLoginTimestamp = System.currentTimeMillis()
+            )
+            repository.saveSessionData(sessionData)
+
+            Log.d(TAG, "Sesión tradicional guardada exitosamente")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error al guardar sesión tradicional: ${e.message}", e)
+        }
     }
 }

@@ -22,7 +22,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
+            android:label="Sistema de Control de Asistencia - EPN"
             android:theme="@style/Theme.AMA_Practica07">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

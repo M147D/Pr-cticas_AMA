@@ -1,10 +1,13 @@
 package com.example.ama_practica07.data
 
 import android.content.Context
+import android.content.SharedPreferences
 import com.example.ama_practica07.models.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.json.JSONArray
+import org.json.JSONObject
 
 /**
  * Repositorio de usuarios
@@ -17,7 +20,11 @@ object UsuarioRepository {
 
     // NUEVO: Repositorio para persistencia local
     private lateinit var registroLocalRepo: RegistroLocalRepository
+    private lateinit var sharedPreferences: SharedPreferences
     private var isInitialized = false
+
+    private const val PREFS_NAME = "usuarios_prefs"
+    private const val KEY_USUARIOS = "usuarios_guardados"
 
     /**
      * Lista de usuarios de ejemplo
@@ -121,7 +128,11 @@ object UsuarioRepository {
         if (isInitialized) return
 
         registroLocalRepo = RegistroLocalRepository(context)
+        sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         isInitialized = true
+
+        // NUEVO: Cargar usuarios guardados
+        cargarUsuarios()
 
         // NUEVO: Cargar registros guardados
         val registrosGuardados = registroLocalRepo.cargarRegistros()
@@ -194,12 +205,19 @@ object UsuarioRepository {
 
     /**
      * Agrega un nuevo usuario
+     * NUEVO: Guarda en persistencia local
      */
     fun agregarUsuario(usuario: Usuario): Boolean {
         if (usuarios.any { it.id == usuario.id }) {
             return false // Ya existe un usuario con ese ID
         }
         usuarios.add(usuario)
+
+        // NUEVO: Guardar usuarios en SharedPreferences
+        if (isInitialized) {
+            guardarUsuarios()
+        }
+
         return true
     }
 
@@ -355,5 +373,64 @@ object UsuarioRepository {
             "dentroDelRango" to registrosAcceso.count { it.ubicacion.estaDentroDelRango() },
             "fueraDelRango" to registrosAcceso.count { !it.ubicacion.estaDentroDelRango() }
         )
+    }
+
+    // ==================== PERSISTENCIA DE USUARIOS ====================
+
+    /**
+     * Guarda la lista de usuarios en SharedPreferences
+     * Usa JSONArray para serialización similar a RegistroLocalRepository
+     */
+    private fun guardarUsuarios() {
+        try {
+            val jsonArray = JSONArray()
+
+            usuarios.forEach { usuario ->
+                val jsonObject = JSONObject().apply {
+                    put("id", usuario.id)
+                    put("nombre", usuario.nombre)
+                    put("correo", usuario.correo)
+                    put("edad", usuario.edad)
+                    put("rol", usuario.rol.name)
+                    put("enabled", usuario.enabled)
+                }
+                jsonArray.put(jsonObject)
+            }
+
+            sharedPreferences.edit().putString(KEY_USUARIOS, jsonArray.toString()).apply()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Carga la lista de usuarios desde SharedPreferences
+     * Usa JSONArray para deserialización similar a RegistroLocalRepository
+     */
+    private fun cargarUsuarios() {
+        try {
+            val jsonString = sharedPreferences.getString(KEY_USUARIOS, "[]") ?: "[]"
+            val jsonArray = JSONArray(jsonString)
+
+            for (i in 0 until jsonArray.length()) {
+                val json = jsonArray.getJSONObject(i)
+
+                val usuario = Usuario(
+                    id = json.getInt("id"),
+                    nombre = json.getString("nombre"),
+                    correo = json.getString("correo"),
+                    edad = json.getInt("edad"),
+                    rol = Rol.valueOf(json.getString("rol")),
+                    enabled = json.getBoolean("enabled")
+                )
+
+                // Agregar solo si no existe ya (para no duplicar los de ejemplo)
+                if (!usuarios.any { it.id == usuario.id }) {
+                    usuarios.add(usuario)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
