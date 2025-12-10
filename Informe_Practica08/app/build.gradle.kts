@@ -10,7 +10,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.ama_practica08"
+        applicationId = "com.example.ama_practica06"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
