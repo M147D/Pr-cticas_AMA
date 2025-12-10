@@ -1,0 +1,77 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Círculo de fondo del reloj -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,24 A30,30 0 1,1 54,84 A30,30 0 1,1 54,24 Z" />
+
+    <!-- Borde del reloj -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeWidth="3"
+        android:strokeColor="#2196F3"
+        android:pathData="M54,27 A27,27 0 1,1 54,81 A27,27 0 1,1 54,27 Z" />
+
+    <!-- Marcas de las horas (12, 3, 6, 9) -->
+    <!-- 12 en punto -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M52,31 L56,31 L56,37 L52,37 Z" />
+
+    <!-- 3 en punto -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M71,52 L77,52 L77,56 L71,56 Z" />
+
+    <!-- 6 en punto -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M52,71 L56,71 L56,77 L52,77 Z" />
+
+    <!-- 9 en punto -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M31,52 L37,52 L37,56 L31,56 Z" />
+
+    <!-- Manecilla de hora (apuntando a las 10) -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M54,54 L48,42 L50,41 L56,53 Z" />
+
+    <!-- Manecilla de minuto (apuntando a las 2) -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M54,54 L66,46 L67,48 L55,56 Z" />
+
+    <!-- Centro del reloj -->
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M54,54 m-4,0 a4,4 0 1,1 8,0 a4,4 0 1,1 -8,0" />
+
+    <!-- Check mark en el lado inferior derecho -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeWidth="6"
+        android:strokeColor="#4CAF50"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M64,64 L70,70 L82,58" />
+
+    <!-- Círculo verde detrás del check -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M72,66 m-14,0 a14,14 0 1,1 28,0 a14,14 0 1,1 -28,0" />
+
+    <!-- Check mark blanco encima del círculo verde -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeWidth="5"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M64,66 L70,72 L82,60" />
+</vector>
