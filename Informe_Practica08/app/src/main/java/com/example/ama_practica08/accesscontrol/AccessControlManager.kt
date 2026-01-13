@@ -147,8 +147,8 @@ class AccessControlManager(
             }
 
             ScreenPermission.USER_ROLE -> {
-                // Requiere rol USER específicamente
-                if (usuario.rol == Rol.USER) {
+                // Permitir USER y ADMIN (admin tiene acceso a todo)
+                if (usuario.rol == Rol.USER || usuario.rol == Rol.ADMIN) {
                     AccessResult.Granted
                 } else {
                     AccessResult.Denied(

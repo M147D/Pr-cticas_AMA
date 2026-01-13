@@ -212,7 +212,7 @@ class SessionManager(context: Context) {
 
     /**
      * Guarda una sesión para login tradicional (sin Firebase)
-     * Crea un UID sintético usando el userId
+     * Crea un UID sintético usando el userId y actualiza el estado de sesión
      *
      * @param userId ID del usuario del repositorio local
      * @param email Correo del usuario
@@ -238,10 +238,27 @@ class SessionManager(context: Context) {
             )
             repository.saveSessionData(sessionData)
 
+            // NUEVO: Buscar el usuario completo y actualizar el estado inmediatamente
+            val userIdInt = userId.toIntOrNull()
+            if (userIdInt != null) {
+                val usuario = com.example.ama_practica08.data.UsuarioRepository
+                    .obtenerUsuarioPorId(userIdInt)
+
+                if (usuario != null && usuario.enabled) {
+                    // Actualizar estado de sesión inmediatamente
+                    _sessionState.value = SessionState.Active(usuario, syntheticUid)
+                    Log.d(TAG, "Sesión tradicional iniciada para: ${usuario.nombre} (${usuario.rol})")
+                } else {
+                    Log.w(TAG, "Usuario no encontrado o deshabilitado")
+                    _sessionState.value = SessionState.Inactive
+                }
+            }
+
             Log.d(TAG, "Sesión tradicional guardada exitosamente")
 
         } catch (e: Exception) {
             Log.e(TAG, "Error al guardar sesión tradicional: ${e.message}", e)
+            _sessionState.value = SessionState.Error("Error al iniciar sesión: ${e.message}")
         }
     }
 }

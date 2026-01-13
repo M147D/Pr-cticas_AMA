@@ -409,8 +409,6 @@ fun AppNavigation() {
                 LoginScreen(
                     onLoginSuccess = { usuario ->
                         usuarioActual = usuario
-                        // MODIFICADO: Ir a home primero, igual que Google Sign-In
-                        navigateWithValidation("home")
 
                         // NUEVO: Guardar sesión con el SessionManager para login tradicional
                         scope.launch {
@@ -420,6 +418,9 @@ fun AppNavigation() {
                                 displayName = usuario.nombre
                             )
                         }
+
+                        // Navegar directamente a home sin validación (acabamos de autenticar)
+                        pantalla = "home"
                     },
                     onBack = { navigateWithValidation("welcome") },
                     onGoogleSignInClick = {
@@ -435,7 +436,18 @@ fun AppNavigation() {
                 com.example.ama_practica08.auth.RegisterScreen(
                     onRegisterSuccess = { usuario ->
                         usuarioActual = usuario
-                        navigateWithValidation("home")
+
+                        // NUEVO: Guardar sesión con el SessionManager para registro tradicional
+                        scope.launch {
+                            sessionManager.saveTraditionalLogin(
+                                userId = usuario.id.toString(),
+                                email = usuario.correo,
+                                displayName = usuario.nombre
+                            )
+                        }
+
+                        // Navegar directamente a home sin validación (acabamos de crear la cuenta)
+                        pantalla = "home"
                     },
                     onBack = { navigateWithValidation("login") },
                     onLoginClick = { navigateWithValidation("login") }
@@ -456,7 +468,8 @@ fun AppNavigation() {
                         UserScreen(
                             usuario = usuario,
                             onLogout = {
-                                navigateWithValidation("home")
+                                // Volver a HomeScreen, no hacer logout completo
+                                pantalla = "home"
                             }
                         )
                     }
@@ -477,7 +490,8 @@ fun AppNavigation() {
                         AdminScreen(
                             usuario = usuario,
                             onLogout = {
-                                navigateWithValidation("home")
+                                // Volver a HomeScreen, no hacer logout completo
+                                pantalla = "home"
                             }
                         )
                     }
@@ -494,36 +508,29 @@ fun AppNavigation() {
                 )
             }
             "home" -> {
-                ProtectedRoute(
-                    targetScreen = "home",
-                    accessControlManager = accessControlManager,
-                    onAccessDenied = { reason, fallback ->
-                        mensajeAccesoDenegado = reason
-                        mostrarDialogoAccesoDenegado = true
-                        pantalla = fallback
-                    },
-                    onRequiresAuth = { navigateWithValidation("login") }
-                ) {
-                    // NUEVO: HomeScreen después del login con Google
-                    usuarioActual?.let { usuario ->
-                        val googleUserInfo = com.example.ama_practica08.auth.GoogleUserInfo(
-                            uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                            email = usuario.correo,
-                            displayName = usuario.nombre,
-                            photoUrl = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.photoUrl?.toString()
-                        )
-                        com.example.ama_practica08.auth.HomeScreen(
-                            user = googleUserInfo,
-                            onSignOutClick = {
-                                handleLogout()
-                            },
-                            onAccessSystemClick = {
-                                // Ir al sistema de asistencia con validación
-                                val targetScreen = if (usuario.isAdmin()) "admin" else "user"
-                                navigateWithValidation(targetScreen)
-                            }
-                        )
-                    }
+                // MODIFICADO: HomeScreen sin ProtectedRoute - validación solo al hacer click en botones
+                usuarioActual?.let { usuario ->
+                    val googleUserInfo = com.example.ama_practica08.auth.GoogleUserInfo(
+                        uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                        email = usuario.correo,
+                        displayName = usuario.nombre,
+                        photoUrl = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.photoUrl?.toString()
+                    )
+                    com.example.ama_practica08.auth.HomeScreen(
+                        user = googleUserInfo,
+                        onSignOutClick = {
+                            handleLogout()
+                        },
+                        onAccessSystemClick = {
+                            // Botón "Registro de Asistencia" - siempre navega a UserScreen
+                            navigateWithValidation("user")
+                        },
+                        onAccessDashboardClick = {
+                            // Botón "Dashboard de Asistencias" - siempre navega a AdminScreen
+                            // Si es USER, mostrará el mensaje de acceso denegado
+                            navigateWithValidation("admin")
+                        }
+                    )
                 }
             }
         }

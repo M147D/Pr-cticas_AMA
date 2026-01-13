@@ -46,7 +46,8 @@ import coil.compose.AsyncImage
 fun HomeScreen(
     user: GoogleUserInfo,
     onSignOutClick: () -> Unit,
-    onAccessSystemClick: () -> Unit = {},  // NUEVO: callback para acceder al sistema
+    onAccessSystemClick: () -> Unit = {},  // Callback para Registro de Asistencia (UserScreen)
+    onAccessDashboardClick: () -> Unit = {},  // NUEVO: Callback para Dashboard de Asistencias (AdminScreen)
     modifier: Modifier = Modifier
 ) {
     Scaffold { paddingValues ->
@@ -131,7 +132,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // NUEVO: Botón para acceder al sistema de asistencia
+            // Botón 1: Registro de Asistencia (UserScreen)
             Button(
                 onClick = onAccessSystemClick,
                 modifier = Modifier
@@ -149,12 +150,12 @@ fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = "Sistema de asistencia",
+                        contentDescription = "Registro de asistencia",
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Acceder al Sistema de Asistencia",
+                        text = "Registro de Asistencia",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -162,6 +163,38 @@ fun HomeScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Botón 2: Dashboard de Asistencias (AdminScreen)
+            Button(
+                onClick = onAccessDashboardClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Dashboard de asistencias",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Dashboard de Asistencias",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Botón de cerrar sesión
             Button(
