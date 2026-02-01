@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">AMA Practica 09</string>
+    <string name="default_notification_channel_id">default_channel</string>
+</resources>
